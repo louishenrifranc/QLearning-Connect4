@@ -21,6 +21,21 @@ def is_in(x, y):
     return True
 
 
+def ia_move(state):
+    next_col = -1
+    max_elmnt = -1
+    for col in xrange(nb_col):
+        nb_elmnt = np.count_nonzero(state['map'][, col] == 1)
+        if nb_elmnt > max_elmnt:
+            next_col = col
+            max_elmnt = nb_elmnt
+    assert (max_elmnt != -1)
+    row = -1
+    while (state['map'][row + 1][next_col] != -1):
+        row += 1
+    return maxe_move(1, state, [row, col])
+
+
 def make_move(player, state, action):
     x, y = action[0], action[1]
     if not is_in(x, y):
