@@ -20,20 +20,42 @@ def is_in(x, y):
         return False
     return True
 
+def nb_neighboors(state, x, y, player):
+    max_count = -1
+    for pair in [[-1, -1, 1, 1], [-1, 0, 1, 0], [0, -1, 0, 1]]:
+        xup, yup, xdown, ydown = pair
+        count = 1
+        x_ac, y_ac = x + xup, y + yup
+        while is_in(x_ac, y_ac) and state['map'][x_ac][y_ac] == player:
+            x_ac += xup
+            y_ac += yup
+            count += 1
+        x_ac, y_ac = x + xdown, y + ydown
+        while is_in(x_ac, y_ac) and state['map'][x_ac][y_ac] == player:
+            x_ac += xdown
+            y_ac += ydown
+            count += 1
+        if max_count < count:
+            max_count = count
+    return max_count
 
 def ia_move(state):
-    next_col = -1
-    max_elmnt = -1
+    best_score = -1
     for col in xrange(nb_col):
-        nb_elmnt = np.count_nonzero(state['map'][, col] == 1)
-        if nb_elmnt > max_elmnt:
-            next_col = col
-            max_elmnt = nb_elmnt
-    assert (max_elmnt != -1)
-    row = -1
-    while (state['map'][row + 1][next_col] != -1):
-        row += 1
-    return maxe_move(1, state, [row, col])
+        row = -1
+        while state['map'][row][col] != -1:
+            row += 1
+            if row == nb_row:
+                break
+        if row == nb_row:
+            break
+        score = nb_neighboors(state, row, col, 1)
+        if score > best_score:
+            best_row = row
+            best_col = col
+            best_score = score
+
+    return make_move(1, state, [best_row, best_col])
 
 
 def make_move(player, state, action):
@@ -58,33 +80,15 @@ def make_move(player, state, action):
 
 
 def get_reward(state):
-    def recursive_check(state, x, y, depth, player, visited):
-        if depth == 3:
-            return True
-        if depth == 0:
-            visited.append([x, y])
-        won = False
-        for i in xrange(-1, 2):
-            for j in xrange(-1, 2):
-                if is_in(x + i, y + j):
-                    if (i != 0 or j != 0):
-                        if not ([x + i, y + j] in visited):
-                            # print(x + i, y + j, state['map'][x + i][y + j], player)
-                            if state['map'][x + i][y + j] == player:
-                                visited.append([x + i, y + j])
-                                won = won or recursive_check(state, x + i, y + j, depth + 1, player, visited)
-                                visited.pop()
-        return won
-
     x = state['last_move'][0]
     y = state['last_move'][1]
     player = state['player'] - 1
     if player < 0:
         player = 1
     if x == -1:
-        return -6
+        return -5
     else:
-        has_won = recursive_check(state, x, y, 0, player, [])
+        has_won = (nb_neighboors(state, x, y, player) == 4)
     if has_won and player == 0:
         return 10
     elif has_won and player == 1:
@@ -108,15 +112,23 @@ if __name__ == '__main__':
     print(get_reward(state))
     state = make_move(1, state, [0, 2])
     print(get_reward(state))
-    state = make_move(0, state, [1, 1])
+    state = make_move(0, state, [1, 2])
     print(get_reward(state))
-    state = make_move(1, state, [1, 2])
+    state = make_move(1, state, [0, 3])
     print(get_reward(state))
-    state = make_move(0, state, [2, 1])
+    state = make_move(0, state, [1, 3])
     print(get_reward(state))
-    state = make_move(1, state, [2, 2])
+    state = make_move(1, state, [0, 4])
     print(get_reward(state))
-    state = make_move(0, state, [0, 3])
+    state = make_move(0, state, [2, 3])
     print(get_reward(state))
-    state = make_move(1, state, [3, 2])
+    state = make_move(1, state, [1, 4])
     print(get_reward(state))
+    state = make_move(0, state, [2, 4])
+    print(get_reward(state))
+    state = make_move(1, state, [0, 5])
+    print(get_reward(state))
+    state = make_move(1, state, [3, 4])
+    print(get_reward(state))
+
+
